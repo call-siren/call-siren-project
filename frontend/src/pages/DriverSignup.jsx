@@ -1,6 +1,9 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 
+import { collection, addDoc } from "firebase/firestore"
+import { db } from "../firebase"
+
 function DriverSignup() {
 
   const [name, setName] = useState("")
@@ -10,23 +13,37 @@ function DriverSignup() {
 
   const navigate = useNavigate()
 
-  const handleSignup = () => {
+  const handleSignup = async () => {
 
-    const driverData = {
-      name,
-      phone,
-      password,
-      ambulance
+    try {
+
+      const driverData = {
+        name,
+        phone,
+        password,
+        ambulance,
+        status: "active"
+      }
+
+      // Save to Firebase Firestore
+      await addDoc(collection(db, "drivers"), driverData)
+
+      // Optional local storage
+      localStorage.setItem(
+        "registeredDriver",
+        JSON.stringify(driverData)
+      )
+
+      alert("Driver Registered Successfully")
+
+      navigate("/driver-login")
+
+    } catch (error) {
+
+      console.log(error)
+      alert("Error registering driver")
+
     }
-
-    localStorage.setItem(
-      "registeredDriver",
-      JSON.stringify(driverData)
-    )
-
-    alert("Driver Registered Successfully")
-
-    navigate("/driver-login")
   }
 
   return (
@@ -40,6 +57,7 @@ function DriverSignup() {
         type="text"
         placeholder="Driver Name"
         className="border p-4 rounded-xl w-80 mb-4"
+        value={name}
         onChange={(e) => setName(e.target.value)}
       />
 
@@ -47,6 +65,7 @@ function DriverSignup() {
         type="text"
         placeholder="Phone Number"
         className="border p-4 rounded-xl w-80 mb-4"
+        value={phone}
         onChange={(e) => setPhone(e.target.value)}
       />
 
@@ -54,6 +73,7 @@ function DriverSignup() {
         type="password"
         placeholder="Password"
         className="border p-4 rounded-xl w-80 mb-4"
+        value={password}
         onChange={(e) => setPassword(e.target.value)}
       />
 
@@ -61,6 +81,7 @@ function DriverSignup() {
         type="text"
         placeholder="Ambulance Number"
         className="border p-4 rounded-xl w-80 mb-6"
+        value={ambulance}
         onChange={(e) => setAmbulance(e.target.value)}
       />
 

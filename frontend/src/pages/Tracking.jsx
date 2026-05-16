@@ -1,27 +1,59 @@
-// Tracking.jsx
-
+import MapComponent from "../components/MapComponent"
 import { useEffect, useState } from "react"
 
 function Tracking() {
 
-  const [accepted, setAccepted] = useState(false)
+  const [accepted, setAccepted] =
+    useState(false)
 
-  const driver = localStorage.getItem("acceptedDriver")
-  const ambulance = localStorage.getItem("acceptedAmbulance")
-  const driverPhone = localStorage.getItem("driverPhone")
+  const [completed, setCompleted] =
+    useState(false)
 
-  const location = localStorage.getItem("userLocation")
-  const emergency = localStorage.getItem("userEmergency")
+  const driver =
+    localStorage.getItem("acceptedDriver")
+
+  const ambulance =
+    localStorage.getItem("acceptedAmbulance")
+
+  const driverPhone =
+    localStorage.getItem("driverPhone")
+
+  const location =
+    localStorage.getItem("userLocation")
+
+  const emergency =
+    localStorage.getItem("userEmergency")
 
   useEffect(() => {
 
-    if (driver && ambulance) {
-      setAccepted(true)
-    }
+    const interval = setInterval(() => {
 
-  }, [driver, ambulance])
+      const acceptedDriver =
+        localStorage.getItem("acceptedDriver")
+
+      const completedEmergency =
+        localStorage.getItem("completedEmergency")
+
+      if (acceptedDriver) {
+
+        setAccepted(true)
+
+      }
+
+      if (completedEmergency === "true") {
+
+        setCompleted(true)
+
+      }
+
+    }, 1000)
+
+    return () => clearInterval(interval)
+
+  }, [])
 
   return (
+
     <div className="min-h-screen bg-blue-50 flex flex-col justify-center items-center p-10">
 
       <h1 className="text-5xl font-bold text-blue-700 mb-8">
@@ -38,7 +70,23 @@ function Tracking() {
           Emergency Type: {emergency}
         </p>
 
-        {accepted ? (
+        {/* COMPLETED */}
+
+        {completed ? (
+
+          <div>
+
+            <h2 className="text-3xl font-bold text-green-600 mb-4">
+              Emergency Completed ✅
+            </h2>
+
+            <p className="text-lg text-gray-700">
+              Patient safely reached hospital.
+            </p>
+
+          </div>
+
+        ) : accepted ? (
 
           <div>
 
@@ -54,8 +102,8 @@ function Tracking() {
               Ambulance Number: {ambulance}
             </p>
 
-            <div className="bg-gray-200 h-64 rounded-xl flex justify-center items-center mb-4">
-              Ambulance Live Location Map
+            <div className="mb-4">
+              <MapComponent />
             </div>
 
             <p className="mb-4 text-green-600 font-semibold text-lg">
@@ -83,6 +131,7 @@ function Tracking() {
       </div>
 
     </div>
+
   )
 }
 

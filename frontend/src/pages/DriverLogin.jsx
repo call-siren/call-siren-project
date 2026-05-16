@@ -1,6 +1,15 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 
+import {
+  collection,
+  query,
+  where,
+  getDocs
+} from "firebase/firestore"
+
+import { db } from "../firebase"
+
 function DriverLogin() {
 
   const [phone, setPhone] = useState("")
@@ -9,38 +18,49 @@ function DriverLogin() {
 
   const navigate = useNavigate()
 
-  const registeredDriver = JSON.parse(
-    localStorage.getItem("registeredDriver")
-  )
+  const handleLogin = async () => {
 
-  const handleLogin = () => {
+    try {
 
-    if (
-      registeredDriver &&
-      phone === registeredDriver.phone &&
-      password === registeredDriver.password
-    ) {
-
-      localStorage.setItem(
-        "driverName",
-        registeredDriver.name
+      const q = query(
+        collection(db, "drivers"),
+        where("phone", "==", phone),
+        where("password", "==", password)
       )
 
-      localStorage.setItem(
-        "ambulanceNumber",
-        registeredDriver.ambulance
-      )
+      const querySnapshot = await getDocs(q)
 
-      localStorage.setItem(
-        "driverPhone",
-        registeredDriver.phone
-      )
+      if (!querySnapshot.empty) {
 
-      navigate("/driver-dashboard")
+        const driverData = querySnapshot.docs[0].data()
 
-    } else {
+        localStorage.setItem(
+          "driverName",
+          driverData.name
+        )
 
-      setError("Invalid Phone Number or Password")
+        localStorage.setItem(
+          "ambulanceNumber",
+          driverData.ambulance
+        )
+
+        localStorage.setItem(
+          "driverPhone",
+          driverData.phone
+        )
+
+        navigate("/driver-dashboard")
+
+      } else {
+
+        setError("Invalid Phone Number or Password")
+
+      }
+
+    } catch (error) {
+
+      console.log(error)
+      setError("Login Error")
 
     }
 
@@ -57,6 +77,7 @@ function DriverLogin() {
         type="text"
         placeholder="Phone Number"
         className="border p-4 rounded-xl w-80 mb-4"
+        value={phone}
         onChange={(e) => setPhone(e.target.value)}
       />
 
@@ -64,6 +85,7 @@ function DriverLogin() {
         type="password"
         placeholder="Password"
         className="border p-4 rounded-xl w-80 mb-4"
+        value={password}
         onChange={(e) => setPassword(e.target.value)}
       />
 

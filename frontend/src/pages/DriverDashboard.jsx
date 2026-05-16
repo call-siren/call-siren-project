@@ -1,29 +1,93 @@
+// DriverDashboard.jsx
+
 import { useNavigate } from "react-router-dom"
+import { useEffect } from "react"
+import MapComponent from "../components/MapComponent"
 
 function DriverDashboard() {
 
   const navigate = useNavigate()
 
-  const driverName = localStorage.getItem("driverName")
-  const ambulanceNumber = localStorage.getItem("ambulanceNumber")
+  const driverName =
+    localStorage.getItem("driverName")
 
-  const userName = localStorage.getItem("userName")
-  const userPhone = localStorage.getItem("userPhone")
-  const userLocation = localStorage.getItem("userLocation")
-  const userEmergency = localStorage.getItem("userEmergency")
+  const ambulanceNumber =
+    localStorage.getItem("ambulanceNumber")
 
-  const accepted = localStorage.getItem("acceptedDriver")
+  const userName =
+    localStorage.getItem("userName")
+
+  const userPhone =
+    localStorage.getItem("userPhone")
+
+  const userLocation =
+    localStorage.getItem("userLocation")
+
+  const userEmergency =
+    localStorage.getItem("userEmergency")
+
+  const accepted =
+    localStorage.getItem("acceptedDriver")
+
+  // DRIVER LIVE LOCATION
+
+  useEffect(() => {
+
+    navigator.geolocation.watchPosition(
+
+      (position) => {
+
+        const lat = position.coords.latitude
+        const lng = position.coords.longitude
+
+        localStorage.setItem("driverLat", lat)
+        localStorage.setItem("driverLng", lng)
+
+      },
+
+      (error) => {
+
+        console.log(error)
+
+      },
+
+      {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+        timeout: 5000
+      }
+
+    )
+
+  }, [])
 
   const hasRequest =
     userLocation && userEmergency
 
+  // ACCEPT EMERGENCY
+
   const acceptEmergency = () => {
 
-    localStorage.setItem("acceptedDriver", driverName)
-    localStorage.setItem("acceptedAmbulance", ambulanceNumber)
+    localStorage.setItem(
+      "acceptedDriver",
+      driverName
+    )
+
+    localStorage.setItem(
+      "acceptedAmbulance",
+      ambulanceNumber
+    )
+
+    localStorage.setItem(
+      "driverPhone",
+      localStorage.getItem("driverPhone")
+    )
 
     navigate("/driver-dashboard")
+
   }
+
+  // REJECT EMERGENCY
 
   const clearOldRequest = () => {
 
@@ -36,9 +100,34 @@ function DriverDashboard() {
     localStorage.removeItem("acceptedAmbulance")
 
     window.location.reload()
+
+  }
+
+  // COMPLETE EMERGENCY
+
+  const completeEmergency = () => {
+
+    localStorage.setItem(
+      "completedEmergency",
+      "true"
+    )
+
+    localStorage.removeItem("userName")
+    localStorage.removeItem("userPhone")
+    localStorage.removeItem("userLocation")
+    localStorage.removeItem("userEmergency")
+
+    localStorage.removeItem("acceptedDriver")
+    localStorage.removeItem("acceptedAmbulance")
+
+    alert("Emergency Completed Successfully")
+
+    window.location.reload()
+
   }
 
   return (
+
     <div className="min-h-screen bg-gray-100 flex flex-col justify-center items-center p-10">
 
       <h1 className="text-5xl font-bold text-red-600 mb-4">
@@ -137,13 +226,26 @@ function DriverDashboard() {
               Location: {userLocation}
             </p>
 
-            <div className="bg-gray-200 h-64 rounded-xl flex justify-center items-center mb-4">
-              User Location Map
+            {/* LIVE MAP */}
+
+            <div className="mb-4">
+              <MapComponent />
             </div>
 
-            <p className="text-green-600 font-semibold">
-              Navigate To Emergency Location
-            </p>
+            <div className="flex flex-col gap-4">
+
+              <p className="text-green-600 font-semibold">
+                Navigate To Emergency Location
+              </p>
+
+              <button
+                onClick={completeEmergency}
+                className="bg-blue-600 text-white py-3 rounded-xl font-semibold"
+              >
+                Complete Emergency
+              </button>
+
+            </div>
 
           </div>
 
@@ -152,6 +254,7 @@ function DriverDashboard() {
       </div>
 
     </div>
+
   )
 }
 
