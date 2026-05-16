@@ -2,7 +2,7 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 
 import { collection, addDoc } from "firebase/firestore"
-import { db } from "../firebase.js"
+import { db } from "../firebase"
 
 function DriverSignup() {
 
